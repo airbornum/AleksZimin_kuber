@@ -6,8 +6,8 @@
 
 ## В процессе сделано:
 ### task01 
-  - Создал манифесты:
-    01-sa-admin-bob.yaml - создание sa bob и ClusterRoleBinding пользователя bob к кластерной роли admin
+  - Создал манифесты:  
+    01-sa-admin-bob.yaml - создание sa bob и ClusterRoleBinding пользователя bob к кластерной роли admin  
     02-sa-dave.yaml - создание sa dave
   - Применил манифесты:
     ~~~~
@@ -24,10 +24,10 @@
     ~~~~
     
 ### task02    
- - Создал манифесты:
-   01-ns-prometheus.yaml - создание ns  prometheus 
-   02-sa-carol-ns-prometheus.yaml - создание sa carol в ns prometheus
-   03-clusterrole-pod-reader.yaml - создание кластерной роли pod-reader
+ - Создал манифесты:  
+   01-ns-prometheus.yaml - создание ns  prometheus  
+   02-sa-carol-ns-prometheus.yaml - создание sa carol в ns prometheus  
+   03-clusterrole-pod-reader.yaml - создание кластерной роли pod-reader  
    04-clusterrolesbinding.yaml - создание clusterrolesbinding для всех sa в ns prometheus к кластерной роли pod-reader (используем в качестве субъекта группу system:serviceaccounts:prometheus)
   - Применил манифесты:
     ~~~~
@@ -55,10 +55,10 @@
     ~~~~
 
 ### task03    
- - Создал манифесты:
-   01-ns-dev.yaml - создание ns dev 
-   02-sa-jane-ns-dev-admin.yaml - создание sa jane в ns dev и rolebinding данного пользователя к кластерной роли admin для ns dev
-   03-sa-ken-ns-dev-view.yaml- создание sa ken в ns dev и rolebinding данного пользователя к кластерной роли view для ns dev
+ - Создал манифесты:  
+   01-ns-dev.yaml - создание ns dev  
+   02-sa-jane-ns-dev-admin.yaml - создание sa jane в ns dev и rolebinding данного пользователя к кластерной роли admin для ns dev  
+   03-sa-ken-ns-dev-view.yaml- создание sa ken в ns dev и rolebinding данного пользователя к кластерной роли view для ns dev  
   - Применил манифесты:
     ~~~~
     kubectl apply -f 01-ns-dev.yaml
