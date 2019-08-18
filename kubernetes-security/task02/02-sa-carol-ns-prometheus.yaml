@@ -1,0 +1,7 @@
+---
+# Create Service Account
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: carol
+  namespace: prometheus
