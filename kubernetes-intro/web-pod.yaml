@@ -2,7 +2,7 @@
 apiVersion: v1
 kind: Pod
 metadata:
-  name: web-nginx
+  name: web
   labels:
     app: web-intro
 spec:
@@ -10,7 +10,7 @@ spec:
   - name: app
     emptyDir: {}
   containers:
-  - name: web-nginx
+  - name: web
     image: zav19/web_intro:1.0
     volumeMounts:
     - name: app
