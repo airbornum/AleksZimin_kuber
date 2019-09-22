@@ -1,0 +1,44 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: web
+  namespace: web-canary
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: web
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 100%
+      maxSurge: 0
+  template:
+    metadata:
+      name: web
+      labels:
+        app: web
+    spec:
+      volumes:
+      - name: app
+        emptyDir: {}
+      containers:
+      - name: web
+        image: zav19/web_intro:1.0
+        volumeMounts:
+        - name: app
+          mountPath: /app
+          readOnly: true
+        readinessProbe: # Добавим проверку готовности
+          httpGet: # веб-сервера отдавать
+            path: /index.html # контент
+            port: 8000
+        livenessProbe:
+          tcpSocket: { port: 8000 }
+      initContainers:
+      - name: init-web
+        image: busybox:1.31.0
+        command: ['sh', '-c', 'echo "NEW DEPLOYMENT">/app/index.html']
+        volumeMounts:
+        - name: app
+          mountPath: /app
