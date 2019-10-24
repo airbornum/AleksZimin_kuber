@@ -4,7 +4,7 @@ kind: Pod
 metadata:
   name: web
   labels:
-    app: web-intro
+    app: web
 spec:
   volumes:
   - name: app
@@ -15,6 +15,12 @@ spec:
     volumeMounts:
     - name: app
       mountPath: /app
+    readinessProbe: # Добавим проверку готовности
+      httpGet: # веб-сервера отдавать
+        path: /index.html # контент
+        port: 8000
+    livenessProbe:
+      tcpSocket: { port: 8000 }
   initContainers:
   - name: init-web
     image: busybox:1.31.0
