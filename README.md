@@ -7,6 +7,6 @@ AleksZimin Platform repository
 
 ## [HW-3. kubernetes-networks](docs/HW-3/README.md)
 
-## [HW-4. kubernetes-networks](docs/HW-4/README.md)  [![Build Status](https://travis-ci.com/otus-kuber-2019-06/AleksZimin_platform.svg?branch=kubernetes-volumes)](https://travis-ci.com/otus-kuber-2019-06/AleksZimin_platform)
+## [HW-4. kubernetes-volumes](docs/HW-4/README.md)  [![Build Status](https://travis-ci.com/otus-kuber-2019-06/AleksZimin_platform.svg?branch=kubernetes-volumes)](https://travis-ci.com/otus-kuber-2019-06/AleksZimin_platform)
 
 ## [HW-5. kubernetes-storage](docs/HW-5/README.md)  [![Build Status](https://travis-ci.com/otus-kuber-2019-06/AleksZimin_platform.svg?branch=kubernetes-storage)](https://travis-ci.com/otus-kuber-2019-06/AleksZimin_platform)
