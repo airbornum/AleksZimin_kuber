@@ -59,8 +59,8 @@ kubectl apply -f service-account.yml
 curl -LO https://gist.githubusercontent.com/Evgenikk/581fa5bba6d924a3438be1e3d31aa468/raw/99429270c474cc434748e1058919e27df01d9a48/role.yml
 kubectl apply -f role.yml
 
-curl -LO https://gist.githubusercontent.com/Evgenikk/581fa5bba6d924a3438be1e3d31aa468/raw/99429270c474cc434748e1058919e27df01d9a48/ClusterRoleBinding.yml
-kubectl apply -f ClusterRoleBinding.yml
+curl  https://gist.githubusercontent.com/Evgenikk/581fa5bba6d924a3438be1e3d31aa468/raw/99429270c474cc434748e1058919e27df01d9a48/ClusterRoleBinding.yml -o role-binding.yaml
+kubectl apply -f role-binding.yml
 
 curl -LO https://gist.githubusercontent.com/Evgenikk/581fa5bba6d924a3438be1e3d31aa468/raw/619023d01e49ca3702357d4fded4d054cd523a9a/deploy-operator.yml
 kubectl apply -f deploy-operator.yml
