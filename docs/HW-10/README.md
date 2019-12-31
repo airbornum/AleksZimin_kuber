@@ -92,12 +92,12 @@ kubectl apply -f kubernetes-templating/cert-manager/05-clusterissuer.yaml
 
 
 
-### chartmuseum
+### Chartmuseum
 - Установил плагин helm-tiller, позволяющий запустить tiller локально
 ~~~
 helm plugin install https://github.com/rimusz/helm-tiller
 ~~~
-- Кастомизировал установку chartmuseum. Для этого необходимо отредактировать файл values.yaml(раскомментировать раздел ingress).  
+- Кастомизировал установку chartmuseum. Для этого необходимо в файле values.yaml описать раздел ingress.  
 - Включил создание ingress ресурса с корректным hosts.name. Hostname получим из внешнего ip сервиса nginx-ingress + .nip.io (таким образом полчим dns имя)
 ~~~
 kubectl get svc -A | grep nginx-ingress
@@ -130,3 +130,147 @@ helm tiller run \
 helm status chartmuseum
 ~~~
 - Зашел на chartmuseum по URL. Серт выдан Fake LE Intermediate X1, т.к. я использовал тестовый сервер letsencrypt (https://acme-staging-v02.api.letsencrypt.org/directory)
+
+
+### Harbor и helm 3.
+- Установил helm3
+~~~
+curl -LO https://get.helm.sh/helm-v3.0.2-linux-amd64.tar.gz \
+  && tar -zxvf helm-v3.0.2-linux-amd64.tar.gz && chmod +x linux-amd64/helm \
+  && sudo mv linux-amd64/helm /usr/local/bin/helm3 \
+  && rm helm-v3.0.2-linux-amd64.tar.gz \
+  && rm -R linux-amd64
+helm3 version --client
+~~~
+- Удалил tiler из кластера и проверил работу helm2 и helm3
+~~~
+kubectl delete deployment tiller-deploy -n kube-system
+helm list
+helm3 list
+~~~
+
+### Самостоятельное задание. Установка harbor с помощью helm3
+- Добавил репозиторий harbor
+~~~
+helm3 repo add harbor https://helm.goharbor.io
+~~~
+- Описал параметры чарта, которые необходимо изменить, в файле kubernetes-templating/harbor/values.yaml
+- Создал ns для harbor
+~~~
+kubectl apply -f kubernetes-templating/harbor/01-ns-harbor.yaml
+~~~
+- Установил harbor
+~~~
+helm3 upgrade --install harbor harbor/harbor --wait \
+--namespace=harbor \
+--version=1.1.2 \
+-f kubernetes-templating/harbor/values.yaml
+~~~
+- Зашел на harbor по адресу https://harbor.35.228.208.40.nip.io работает и SSL сертификат валидный(Серт выдан Fake LE Intermediate X1, т.к. я использовал тестовый сервер letsencrypt (https://acme-staging-v02.api.letsencrypt.org/directory)
+- Посмотрел инфо о релизе
+~~~
+kubectl get secrets -n harbor -l owner=helm
+~~~
+
+### Свой helm chart
+- Инициализировал структуру директории
+~~~
+helm create kubernetes-templating/socks-shop
+~~~
+- Удалил файл kubernetes-templating/socks-shop/values.yaml и содержимое каталога kubernetes-templating/socks-shop/templates
+
+- Скопировал файл all.yaml из репо
+~~~
+curl https://raw.githubusercontent.com/express42/otus-platform-snippets/master/Module-04/05-Templating/manifests/all.yaml   -o kubernetes-templating/socks-shop/templates/all.yaml
+~~~
+- Установил чарт и проверил его работу (зашел на ноду, т.к. порты извне не открыты)
+~~~
+helm3 upgrade --install socks-shop kubernetes-templating/socks-shop
+kubectl get svc | grep front-end  # - запомнил порт
+gcloud compute ssh $(kubectl get pods -o wide | grep -m 1 front-end | awk '{print $7}') --zone "europe-north1-b"
+curl 127.0.0.1:30001
+~~~
+- В таком виде чарт использовать неудобно. Рекомендуется разбить его на разные и использовать зависимости. Выполнил инструкции из презентации. 
+~~~
+helm create kubernetes-templating/frontend
+rm kubernetes-templating/frontend/values.yaml
+rm -R kubernetes-templating/frontend/templates/*
+touch kubernetes-templating/frontend/templates/{deployment.yaml,service.yaml,ingress.yaml}
+touch kubernetes-templating/frontend/values.yaml
+touch kubernetes-templating/socks-shop/requirements.yaml
+~~~
+- Обновил зависимости
+
+helm dep update kubernetes-templating/socks-shop
+
+- Установил чарт с другим значением nodeport
+~~~
+helm3 uninstall socks-shop
+kubectl create ns socks-shop
+helm3 upgrade --install socks-shop kubernetes-templating/socks-shop --namespace socks-shop --set frontend.service.NodePort=31234
+~~~
+- Проверил новое значение порта у nodeport. Значение изменилось
+~~~
+kubectl get svc -n socks-shop
+~~~
+- Зашел на сайт http://shop.35.228.208.40.nip.io
+
+### Проверка.
+- Заархивировал чарты
+~~~
+helm3 package kubernetes-templating/socks-shop
+helm3 package kubernetes-templating/frontend
+~~~
+- Загрузил их в harbor, используя web-интерфес
+- Добавил свой harbor как репо в helm, используя скрипт kubernetes-templating/repo.sh 
+
+### Kubecfg
+- Вынес из конфига all.yaml Deployment и Service для catalogue и payment в директорию kubernetes-templating/kubecfg
+~~~
+mkdir -p kubernetes-templating/kubecfg
+touch kubernetes-templating/kubecfg/{catalogue-deployment.yaml,catalogue-service.yaml,payment-deployment.yaml,payment-service.yaml}
+~~~
+- Установил kubecfg
+~~~
+curl -LO https://github.com/bitnami/kubecfg/releases/download/v0.14.0/kubecfg-linux-amd64 \
+  && chmod +x ./kubecfg-linux-amd64 \
+  && sudo mv ./kubecfg-linux-amd64 /usr/local/bin/kubecfg
+
+
+~~~
+- Вывод команды kubecfg version
+~~~
+kubecfg version: v0.14.0
+jsonnet version: v0.14.0
+client-go version: v0.0.0-master+$Format:%h$
+~~~
+- Написал свой файл services.jsonnet
+~~~
+touch kubernetes-templating/kubecfg/services.jsonnet
+~~~
+- Проверил генерацию манифестов и установил их
+~~~
+kubecfg show kubernetes-templating/kubecfg/services.jsonnet
+kubecfg update services.jsonnet --namespace socks-shop
+~~~
+
+### Kustomize
+- Кастомизировал сервис и деплоймент queue-master
+~~~
+mkdir -p kubernetes-templating/kustomize/base
+mkdir -p kubernetes-templating/kustomize/overrides/{socks-shop,socks-shop-prod}
+touch kubernetes-templating/kustomize/base/{deployment.yaml,kustomization.yaml,service.yaml}
+touch kubernetes-templating/kustomize/overrides/{socks-shop,socks-shop-prod}/kustomization.yaml
+~~~
+- Установил кастомизированный релиз
+~~~
+kubectl apply -k kubernetes-templating/kustomize/overrides/socks-shop
+~~~
+- Кастомизированные деплоймент и сервис создались:
+~~~
+service/dev-queue-master created
+deployment.apps/dev-queue-master created
+~~~
+
+
+### [Вернуться в корень репо](/../../)
