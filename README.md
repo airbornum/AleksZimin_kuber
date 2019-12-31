@@ -16,3 +16,5 @@ AleksZimin Platform repository
 ## [HW-7. kubernetes-operators](docs/HW-6/README.md)  [![Build Status](https://travis-ci.com/otus-kuber-2019-06/AleksZimin_platform.svg?branch=kubernetes-operators)](https://travis-ci.com/otus-kuber-2019-06/AleksZimin_platform)
 
 ## [HW-10. kubernetes-templating](docs/HW-10/README.md)
+
+## [HW-11. kubernetes-vault](docs/HW-11/README.md)
