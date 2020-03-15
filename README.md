@@ -17,3 +17,4 @@ AleksZimin Platform repository
 
 ## [HW-10. kubernetes-templating](docs/HW-10/README.md)
 
+## [HW-11. kubernetes-vault](docs/HW-11/README.md)
